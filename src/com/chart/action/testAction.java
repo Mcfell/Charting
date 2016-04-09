@@ -17,7 +17,7 @@ public class testAction {
 	private String testkey;
 	
 	@Test
-	public String  test()
+	public String  test() throws InterruptedException
 	{
 		String key="hello";
 		System.out.println("this is a test action!");
@@ -29,6 +29,7 @@ public class testAction {
 		userMapper.insertUser(user);*/
 		System.out.println(key);
 		MemcachedUtils.add("key", key+" test");
+		Thread.sleep(100);
 		testkey = (String)MemcachedUtils.get("key");
 		System.out.println(key);
 		return Action.SUCCESS;

@@ -6,9 +6,12 @@ public class User  implements Serializable{
 
 	private String email;
 	private String password;
-	
 	private String nickname;
 	private String phone;
+	private String rank;
+	private String winNum;
+	private String loseNum;
+	private String level;
 	public User() {
 		// TODO Auto-generated constructor stub
 	}
@@ -41,6 +44,37 @@ public class User  implements Serializable{
 	}
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public String getRank() {
+		return rank;
+	}
+	public void setRank(String rank) {
+		this.rank = rank;
+	}
+	public String getWinNum() {
+		return winNum;
+	}
+	public void setWinNum(String winNum) {
+		this.winNum = winNum;
+	}
+	public String getLoseNum() {
+		return loseNum;
+	}
+	public void setLoseNum(String loseNum) {
+		this.loseNum = loseNum;
+	}
+	public String getLevel() {
+		return level;
+	}
+	public void setLevel(String level) {
+		this.level = level;
+	}
+	@Override
+	public String toString() {
+		return "User [email=" + email + ", password=" + password
+				+ ", nickname=" + nickname + ", phone=" + phone + ", rank="
+				+ rank + ", winNum=" + winNum + ", loseNum=" + loseNum
+				+ ", level=" + level + "]";
 	}
 	
 }

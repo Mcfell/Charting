@@ -48,7 +48,6 @@ public class RegAction extends BaseAction<User> {
     //进行用户注册
     public String doUserReg(){
         //密码加密
-        //model.setPassword(model.getPassword());
     	System.out.println("register:"+model.getNickname());
     	userMapper.insertUser(model);
         System.out.println("register:"+model.getNickname());
