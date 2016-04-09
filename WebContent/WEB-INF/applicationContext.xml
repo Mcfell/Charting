@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd">
+<!-- 配置DataSource数据源 -->
+<bean id="mysqlDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver">
+		</property>
+		<property name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8"></property>
+		<property name="username" value="root"></property>
+		<!--  <property name="password" value="admin"></property>  -->
+		<property name="password" value="root"></property>
+</bean>
+<!-- 配置事务管理器，注意这里的dataSource和SqlSessionFactoryBean的dataSource要一致，不然事务就没有作用了 -->
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="mysqlDataSource" />
+</bean>
+<!-- 配置事务的传播特性 -->
+<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" abstract="true">
+	<property name="transactionManager" ref="transactionManager" />
+	<property name="transactionAttributes">
+		<props>
+			<prop key="add*">PROPAGATION_REQUIRED</prop>
+			<prop key="edit*">PROPAGATION_REQUIRED</prop>
+			<prop key="remove*">PROPAGATION_REQUIRED</prop>
+			<prop key="insert*">PROPAGATION_REQUIRED</prop>
+			<prop key="update*">PROPAGATION_REQUIRED</prop>
+			<prop key="del*">PROPAGATION_REQUIRED</prop>
+			<prop key="cancel*">PROPAGATION_REQUIRED</prop>
+			<prop key="*">readOnly</prop>
+		</props>
+	</property>
+</bean>
+<!-- 配置Mybatis使用的数据源 -->
+   <!-- mapperLocations：它表示我们的Mapper文件存放的位置，当我们的Mapper文件跟对应的Mapper接口处于同一位置的时候可以不用指定该属性的值。
+		configLocation：用于指定Mybatis的配置文件位置。如果指定了该属性，那么会以该配置文件的内容作为配置信息构建对应的SqlSessionFactoryBuilder，但是后续属性指定的内容会覆盖该配置文件里面指定的对应内容。
+		typeAliasesPackage：它一般对应我们的实体类所在的包，这个时候会自动取对应包中不包括包名的简单类名作为包括包名的别名。多个package之间可以用逗号或者分号等来进行分隔。
+		typeAliases：数组类型，用来指定别名的。指定了这个属性后，Mybatis会把这个类型的短名称作为这个类型的别名，前提是该类上没有标注@Alias注解，否则将使用该注解对应的值作为此种类型的别名。 -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="mysqlDataSource" />
+	<property name="mapperLocations"  value="classpath:com/chart/mapping/*Mapper.xml" />
+	<property name="typeAliasesPackage" value="com.chart.bean" />  
+		<!--  <property name="configLocation" value="classpath:mybatis-config.xml"></property>-->
+</bean>
+<!-- 单独配置一个Mapper； 这种模式就是得给每个mapper接口配置一个bean
+	MapperFactoryBean 创建的代理类实现了 UserMapper 接口,并且注入到应用程序中。 
+	因为代理创建在运行时环境中(Runtime,译者注) ,那么指定的映射器必须是一个接口,而 不是一个具体的实现类。
+<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean"> 
+	<property name="mapperInterface" value="com.chart.Mapper.UserMapper" />
+	<property name="sqlSessionFactory" ref="sqlSessionFactory" /> 
+</bean>  -->
+<!-- 通过扫描的模式，扫描目录在com/hoo/mapper目录下，所有的mapper都继承SqlMapper接口的接口， 这样一个bean就可以了 <br>
+		annotationClass：当指定了annotationClass的时候，MapperScannerConfigurer将只注册使用了annotationClass注解标记的接口。
+		markerInterface：markerInterface是用于指定一个接口的，当指定了markerInterface之后，MapperScannerConfigurer将只注册继承自markerInterface的接口。
+		使用时，直接声明一个带有get/set方法的Mapper类对象即可。Spring利用动态代理来实现Mapper类对象的方法
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" /> -->
+	 <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.chart.Mapper"/>
+		<property name="markerInterface" value="com.chart.Mapper.SqlMapper"/>
+	</bean>
+	
+	
+	<context:component-scan base-package = "com.chart.Mappper" ></context:component-scan>
+	<context:component-scan base-package = "com.chart.service.impl" ></context:component-scan>
+</beans>

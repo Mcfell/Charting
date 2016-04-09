@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="main" extends="struts-default"><!-- 如配置namespace=”/name“，则在访问时需要加上 name,eg:name/loginPerson.action-->
+		<global-results>
+			<result name="login">/login.jsp</result>
+		</global-results>
+		
+		<global-exception-mappings><!-- 全局异常 -->
+			<exception-mapping result="/jsp/exception.jsp" exception="java.lang.Exception"></exception-mapping>
+		</global-exception-mappings>
+		<action name="*Register" class="com.chart.action.RegAction" method="doUserReg">
+			<result name="success">/jsp/success.jsp</result>
+			<result name="regPage">/jsp/UserReg.jsp</result>
+			<result name="error">/jsp/exception.jsp</result>
+		</action>
+	</package>
+</struts>

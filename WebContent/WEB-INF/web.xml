@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns="http://java.sun.com/xml/ns/javaee" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+version="3.0">
+  <display-name>Charting</display-name>
+  
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/applicationContext*.xml,classpath:applicationContext*.xml</param-value>
+  </context-param>
+  
+  <!--  如果没使用OpenEntityManagerInViewFilter，session会在service.find()方法后就被关闭，用了以后session在整个view层结束后才关闭。 
+  <filter>
+    <filter-name>SprintOpenEntityManagerInViewFilter</filter-name>
+    <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+    <init-param>  
+        	指定org.springframework.orm.jpa.LocalEntityManagerFactoryBean在spring配置文件中的名称,默认值为entityManagerFactory  
+        如果LocalEntityManagerFactoryBean在spring中的名称不是entityManagerFactory,该参数一定要指定,否则会出现找不到entityManagerFactory的例外  
+            <param-name>entityManagerFactoryBeanName</param-name>  
+            <param-value>entityManagerFactory</param-value>  
+        </init-param>  
+  </filter>
+  <filter-mapping>
+    <filter-name>SprintOpenEntityManagerInViewFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  -->
+  <!-- 上下文载入器监听器,确保web服务器启动时,直接完成spring容器的初始化 -->
+  <!-- Spring会创建一个WebApplicationContext上下文，称为父上下文（父容器） ，保存在 ServletContext中，key是WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE的值。
+	可以使用Spring提供的工具类取出上下文对象：WebApplicationContextUtils.getWebApplicationContext(ServletContext);
+	 
+	DispatcherServlet是一个Servlet,可以同时配置多个，每个 DispatcherServlet有一个自己的上下文对象（WebApplicationContext），称为子上下文（子容器），子上下文可以访问父上下文中的内容，
+	但父上下文不能访问子上下文中的内容。 它也保存在 ServletContext中，key是"org.springframework.web.servlet.FrameworkServlet.CONTEXT"+Servlet名称。当一个Request对象产生时，
+	会把这个子上下文对象（WebApplicationContext）保存在Request对象中，key是DispatcherServlet.class.getName() + ".CONTEXT"。
+	可以使用工具类取出上下文对象：RequestContextUtils.getWebApplicationContext(request);-->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+ </listener>
+	<!-- 防止Spring内存溢出监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+  <filter>  
+        <!-- 配置Struts2核心Filter的名字 -->  
+        <filter-name>struts2</filter-name>  
+        <!-- 配置Struts2核心Filter的实现类 --> 
+        <!-- FilterDispatcher是struts2.0.x到2.1.2版本的核心过滤器.!
+			 StrutsPrepareAndExecuteFilter是自2.1.3开始就替代了FilterDispatcher的.
+			  我必须使用Action的环境,而又想在执行action之前拿filter做一些事, 用FilterDispatcher是做不到的
+        		三个初始化参数：    
+			  1、config参数：指定要加载的配置文件。逗号分割。   
+			  2、actionPackages参数：指定Action类所在的包空间。逗号分割。    
+			  3、configProviders参数：自定义配置文件提供者，需要实现ConfigurationProvider接口类。逗号分割。  --> 
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>  
+           <!-- 配置Struts2框架默认加载的Action包结构，可以没有。
+          <init-param>  
+              
+              <param-name>actionPackages</param-name>  
+              <param-value>com.chart.action</param-value>  
+          </init-param>   --> 
+          <!-- 配置Struts2框架的配置提供者类  
+          <init-param>  
+              <param-name>configProviders</param-name>  
+              <param-value>lee.MyConfigurationProvider</param-value>  
+          </init-param>   -->
+    </filter>  
+    <!-- 配置Filter拦截的URL -->  
+    <filter-mapping>  
+        <!-- 配置Struts2的核心FilterDispatcher拦截所有用户请求 -->  
+        <filter-name>struts2</filter-name>  
+        <url-pattern>/*</url-pattern>  
+    </filter-mapping> 
+     
+  <welcome-file-list>
+    <welcome-file>jsp/index.jsp</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

@@ -1,0 +1,19 @@
+配置过程：
+1.先整合Spring与Structs,需要将Structs中Action的生命周期交给Spring管理。
+   注意： 需要spring-structs-plugin.jar包
+2.将Mybatis整合进Spring中
+  需要mybatis-spring.jar包。
+3.mybatis中的bean由Spring管理后，是单例模式，一次action中全局维护一个对象。
+  想调时，只需要在action中加入get/set方法即可，spring会自动代理.无需写实现代码.
+  当使用映射器时,你仅仅如调 用你的 DAO一样调用它们就可以了,但是你不需要编写任何 DAO 实现的代码,因为 MyBatis-Spring 将会为你创建代理。
+  
+使用注入的映射器代码,在 MyBatis,Spring 或 MyBatis-Spring 上面不会有直接的依赖。
+MapperFactoryBean 创建的代理控制开放和关闭 session,翻译任意的异常到 Spring 的 DataAccessException 异常中。
+ 此外,如果需要或参与到一个已经存在活动事务中,代理将 会开启一个新的 Spring 事务。
+ 
+ 如果 UserMapper 有一个对应的 MyBatis 的 XML 映射器文件, 如果 XML 文件在类路径的 位置和映射器类相同时, 它会被 MapperFactoryBean 自动解析。
+ 被发现的映射器将会使用 Spring 对自动侦测组件(参考 Spring 手册的 3.14.4)默认的命 名策略来命名。
+ 也就是说,如果没有发现注解,它就会使用映射器的非大写的非完全限定类 名。但是如果发现了@Component 或 JSR-330 的@Named 注解,它会获取名称。
+ 
+ 
+ memcached 配置需求包：commons-pool-1.5.6.jar、java_memcached-release_2.6.6.jar、slf4j-api-1.6.1.jar、slf4j-simple-1.6.1.jar

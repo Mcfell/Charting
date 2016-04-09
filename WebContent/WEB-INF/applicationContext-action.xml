@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+	
+	<!--       action is here       -->
+	<bean id="RegAction" class="com.chart.action.RegAction" scope="prototype">
+		<!-- <property name="userMapper" ref="userMapper" ></property> -->
+	</bean>
+	<bean id="testAction" class="com.chart.action.testAction" scope="prototype">
+		<!-- <property name="userService" ref="userServiceImpl"></property>  -->
+	</bean>
+</beans>
