@@ -1,0 +1,402 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no" />
+	
+    <title>battle</title>
+	
+	<style>
+	@media screen and (min-width: 300px){
+		body{
+			width:100%;
+			height:627px;
+			border:0;
+			margin:0;
+			padding:0;
+		}
+		.content{
+			margin:0 auto;
+			width:375px;
+			height:100%;
+			background:#ACD6FF;
+			position:relative;
+		}
+		.object{
+			position:absolute;
+			width:18%;
+			height:20px;
+			background:red;
+		}
+		.self{
+			left:0px;
+			bottom:0px;
+		}
+		.elemy{
+			left:0px;
+			top:0px;
+		}
+		.boal{
+			
+			position:absolute;
+			left:50%;
+			top:50%;
+			width:10px;
+			border-radius: 5px; 
+			height:10px;
+			background:blue;
+		}
+		
+	}
+	@media screen and (min-device-width: 481px) and (max-device-width: 768px) { 
+    /* STYLES HERE */
+	}
+
+	</style>
+	
+</head>
+<body>
+	<div class="content" id="gameSpace">
+		<div class="object elemy" id="elemy"></div>
+		<div class="object self" id="self"></div>
+		
+	</div>
+</body>
+<script>
+	
+	
+	var getFlag=function (id) {
+	  return document.getElementById(id);   //获取元素引用
+	}
+	var extend=function(des, src) {
+	   for (p in src) {
+		 des[p]=src[p];
+	  }
+	  return des;
+	}
+	var player1 = {
+		info:{
+			name:"test1",
+			rank:101,
+			score:0,
+			gScore:0
+		}
+	}
+	var player2 = {
+		info:{
+			name:"test2",
+			rank:100,
+			score:0,
+			gScore:0
+		}
+	}
+	
+	//创建场景，初始化参数。
+	var Screen = function (cid,config,boalConfig,playerConfig){
+		//先创建类的属性
+		var self=this;
+		if (!(self instanceof Screen)) {
+			return new Screen(cid,config,playerConfig)
+		}
+		config=extend(Screen.Config, config)    //configj是extend类的实例    self.container=getFlag(cid);            //窗口对象
+		
+		playerConfig=extend(Screen.playerConfig, playerConfig)
+		self.boalConfig = boalConfig			//初始化球信息
+		self.playerConfig = playerConfig;		//初始化对局玩家信息
+		self.container=getFlag(cid);			//对局容器
+		self.ballsnum=config.ballsnum;			//球的数量
+		self.diameter=config.diameter;          //球的直径
+		self.radius=self.diameter/2;			//球的半径
+		self.spring=config.spring;              //球相碰后的反弹力
+		self.bounce=config.bounce;              //球碰到窗口边界后的反弹力
+		self.gravity=config.gravity;            //球的重力
+		self.balls=[];                          //把创建的球置于该数组变量
+		self.players=[];						//玩家放置于该数组
+		self.timer=null;                        //调用函数产生的时间id
+		self.L_bound=0;                         //container的边界
+		self.R_bound=self.container.clientWidth;//document.documentElement.clientWidth || document.body.clientWidth 兼容性
+		self.T_bound=20;
+		self.B_bound=self.container.clientHeight-20;
+	};
+	Screen.Config={
+		ballsnum:1,
+		spring:0.8,//球相碰后的反弹力
+		bounce:-0.9,//球碰到窗口边界后的反弹力
+		gravity:0.05,//球的重力
+		diameter:30
+	}
+	Screen.playerConfig=[player1.info,player2.info]
+	
+	//创建小球
+	var Ball=function (diameter,classn) {
+		var ball=document.createElement("div");
+		ball.className=classn;
+		with(ball.style) {
+		  width=height=diameter+'px';position='absolute';
+		}
+		return ball;
+	}
+	//定义全局变量
+	var self_player = getFlag("self");
+	var elemy_player = getFlag("elemy");
+	var boal = getFlag("boal");
+	var gameSpace = getFlag("gameSpace")
+	
+	var msg = {};   //消息内容
+	msg.t = "";
+	msg.c = "";
+	msg.to = "";
+	msg.a = {};
+	msg.a.x="";
+	msg.a.y="";
+	msg.a.vx="";
+	msg.a.vy="";
+		
+	var selfPrePoition=null;	//上一次位置
+	var max = gameSpace.scrollWidth-self_player.scrollWidth;
+	var maxBallAccY = 30;	//小球单位时间Y移动最大像素
+	var maxBallAccX = 30;	//小球单位时间X移动最大像素
+	var maxPlaneSpeed = 50;	//玩家水平最大加速度
+	
+	var clss = ["boal"]
+    /*//小球坐标
+    ballX=0;
+    ballY=0;
+    //小球在x,y轴移动的方向
+    directX=1;
+    directY=1;
+    //小球移动
+    function ballMove(){
+        //小球移动
+		
+        ballX+=2*directX;
+        ballY+=2*directY;
+        //同时修改小球的top 和width
+        boal.style.top=ballY+'px';
+        boal.style.left=ballX+'px';
+        //window.alert(div1.offsetWidth);//offsetwidth在JS中是获取元素的宽,对应的还有offsetHeight
+        //判断转向
+        //learInterval(i);
+        if(ballX+boal.offsetWidth>=gameSpace.offsetWidth ||ballX<=0){
+            directX=-directX;
+        }
+        if(ballY+boal.offsetHeight>=gameSpace.offsetHeight || ballY<=0){
+            directY=-directY;
+        }
+    }
+    //定时器
+    var i=setInterval(ballMove,10); */
+	function IsPC() {
+		var userAgentInfo = navigator.userAgent;
+		var Agents = ["Android", "iPhone",
+					"SymbianOS", "Windows Phone",
+					"iPad", "iPod"];
+		var flag = true;
+		for (var v = 0; v < Agents.length; v++) {
+			if (userAgentInfo.indexOf(Agents[v]) > 0) {
+				flag = false;
+				break;
+			}
+		}
+		return flag;
+	}
+	function mouseMove(event){
+		var event = event||window.event;
+		var gameSpace = getFlag("gameSpace")
+		var t = event.clientX-gameSpace.offsetLeft
+		//var min = self.scrollWidth/2;
+		if(t>max) t = max;
+		self_player.style.cssText="left:"+t+"px"
+		//console.log(gameSpace.offsetLeft+","+gameSpace.offsetTop)
+		//console.log(event.clientX+","+event.clientY)
+		//console.log(event.clientX-gameSpace.offsetLeft)
+	}
+	function touchmove(ev){
+		if(ev.touches.length==1){ 
+            var oDiv=document.getElementById('div1'); 
+			var gameSpace = getFlag("gameSpace")
+			
+            switch(ev.type){ 
+                case 'touchstart': 
+                    oDiv.innerHTML='Touch start('+ev.touches[0].clientX+', '+ev.touches[0].clientY+')'; 
+                    ev.preventDefault();  //阻止出现滚动条 
+                    break; 
+                case 'touchend': 
+                    oDiv.innerHTML='Touch end('+ev.changedTouches[0].clientX+', '+ev.changedTouches[0].clientY+')'; 
+                    break; 
+                case 'touchmove': 
+				    ev.preventDefault();  //阻止出现滚动条 
+					var t = ev.changedTouches[0].clientX-gameSpace.offsetLeft
+					//var min = self.scrollWidth/2;
+					if(t>max) t = max;
+					if(t<0) t=0;
+					if(selfPrePoition)
+						self_player.vx = t-selfPrePoition;
+					else
+						self_player.vx = 0;
+					if(Math.abs(self_player.vx)> maxPlaneSpeed)
+						self_player.vx = maxPlaneSpeed * self_player.vx/Math.abs(self_player.vx);
+					self_player.style.left=t+"px"
+					selfPrePoition = t;
+                    break; 
+                 
+            } 
+        }
+	}
+	
+	document.addEventListener('onmousemove',mouseMove,false); 
+	document.addEventListener('touchmove',touchmove,false); 
+	Screen.prototype={
+    initialize:function () {
+        var self=this;
+        self.createBalls();		//添加小球
+		self.getPlayers();		//添加玩家
+        self.timer=setInterval(function (){self.hitBalls()}, 30)
+    },
+    createBalls:function () {
+        var self=this, 
+            num=self.ballsnum;
+        var frag=document.createDocumentFragment();    //创建文档碎片，避免多次刷新       
+        for (i=0;i<num;i++) {
+            var ball=new Ball(self.diameter,clss[i]);
+            //var ball=new Ball(self.diameter,clss[ Math.floor(Math.random()* num )]);//这里是随机的10个小球的碰撞效果
+            ball.diameter=self.diameter;
+            ball.radius=self.radius;
+
+            ball.style.left=self.boalConfig.x+'px';  //球的初始位置，
+            ball.style.top=self.boalConfig.y+'px';//随机球的初始速度
+            ball.vx = self.boalConfig.vx;
+			ball.vy= self.boalConfig.vy;
+			
+			frag.appendChild(ball);
+            self.balls[i]=ball;			//加入场景
+        }
+        self.container.appendChild(frag);
+    },
+	getPlayers:function(){
+		var self = this;
+		self.players[0]=getFlag("self")
+		self.players[1]=getFlag("elemy")
+	},
+    hitBalls:function () {
+        var self=this, 
+            num=self.ballsnum,
+            balls=self.balls;
+		for (i=0;i<num;i++) {
+           var ball1=self.balls[i];
+           ball1.x=ball1.offsetLeft+ball1.radius;      //小球圆心坐标
+           ball1.y=ball1.offsetTop+ball1.radius;
+           for (j=i+1;j<num;j++) {
+               var ball2=self.balls[j];
+               ball2.x=ball2.offsetLeft+ball2.radius;
+               ball2.y=ball2.offsetTop+ball2.radius;
+               dx=ball2.x-ball1.x;                      //两小球圆心距对应的两条直角边
+               dy=ball2.y-ball1.y;
+               var dist=Math.sqrt(dx*dx + dy*dy);       //两直角边求圆心距
+               var misDist=ball1.radius+ball2.radius;   //圆心距最小值
+              if(dist < misDist) {                    
+                   //假设碰撞后球会按原方向继续做一定的运动，将其定义为运动A   
+                   var angle=Math.atan2(dy,dx);
+                  //当刚好相碰，即dist=misDist时，tx=ballb.x, ty=ballb.y
+                   tx=ball1.x+Math.cos(angle) * misDist; 
+                   ty=ball1.y+Math.sin(angle) * misDist;
+                  //产生运动A后，tx > ballb.x, ty > ballb.y,所以用ax、ay记录的是运动A的值
+                   ax=(tx-ball2.x) * self.spring;  
+                   ay=(ty-ball2.y) * self.spring;
+                  //一个球减去ax、ay，另一个加上它，则实现反弹
+                   ball1.vx-=ax;                         
+                   ball1.vy-=ay;
+                   ball2.vx+=ax;
+                   ball2.vy+=ay;
+              }
+           }
+		   for(var k=0;k<2;k++){	//与玩家的碰撞
+			   var player = self.players[k];
+			   player.maxX = player.offsetLeft+player.scrollWidth;
+			   player.minX = player.offsetLeft;
+			   player.y = player.offsetTop;
+			   if(ball1.x>player.minX&&ball1.x<player.maxX&&Math.abs(player.y-ball1.y)<=ball1.diameter+10){//
+						//ball1.vy*=self.bounce;//占时当做与玩家相撞
+						ball1.vy*=1.3
+						if(k==0){
+							ball1.vx+=self_player.vx;
+							self_player.ishit = true;
+							console.log(ball1.vx)
+						}else{
+							elemy_player.ishit = true;
+						}
+				}else{ 
+					player.ishit=false
+				}
+		   }
+        }
+		
+        for (i=0;i<num;i++) {
+            self.moveBalls(balls[i]);
+        }
+    },
+    moveBalls:function (ball) {
+
+        var self=this;
+        ball.vy+=self.gravity;
+		if(Math.abs(ball.vy)>maxBallAccY) 
+			{
+				ball.vy = maxBallAccY*ball.vy/Math.abs(ball.vy);
+				console.log(ball.vy)
+			}
+		if(Math.abs(ball.vx)>maxBallAccX) 
+			{
+				ball.vx = maxBallAccX*ball.vx/Math.abs(ball.vx);
+				console.log(ball.vx)
+			}
+        ball.style.left=(ball.offsetLeft+ball.vx)+'px';
+        ball.style.top=(ball.offsetTop+ball.vy)+'px';
+        //判断球与窗口边界相碰，把变量名简化一下
+        var L=self.L_bound, R=self.R_bound, T=self.T_bound, B=self.B_bound, BC=self.bounce;  
+        if (ball.offsetLeft < L) {
+            ball.style.left=L+'px';
+            ball.vx*=BC;
+        }
+       else if (ball.offsetLeft + ball.diameter > R) {
+            ball.style.left=(R-ball.diameter)+'px';
+            ball.vx*=BC;
+        }
+       else if (ball.offsetTop < T) {
+			if(elemy_player.ishit){
+				ball.style.top=T+'px';
+			}else{
+				console.log("elemy_player is lose")
+			}
+            ball.style.top=T+'px';
+            ball.vy*=BC;
+        }
+        if (ball.offsetTop > B) {
+			if(self_player.ishit){
+				ball.style.top=(B-ball.diameter)+'px'
+			}else{
+				console.log("self_player is lose")
+			}
+            ball.style.top=(B-ball.diameter)+'px';
+            ball.vy*=BC;
+        }
+        self.sendToServer(ball);
+    },
+	sendToServer:function(ball){
+		var b = {}
+		b.x = ball.x;
+		b.y = ball.y;
+		b.vx = ball.vx;
+		b.vy = ball.vy;
+		
+		msg.t = 101;
+		msg.to = self_player.offsetLeft;
+		msg.a = b
+		msg.chart = "";
+		msg.time = new Date().getTime();
+
+		sendMsg(JSON.stringify(msg))
+		//console.log("send:"+JSON.stringify(msg))
+	}
+}
+	
+</script>

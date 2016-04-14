@@ -89,6 +89,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		<textarea id="chatlog" readonly style="width:500px;height:500px;"></textarea><br/>
 		<input id="msg" type="text" />
 		<button type="submit" id="sendButton" onClick="send()">Send!</button>
+		
 		<button type="submit" id="sendButton" onClick="closeConnect()">End</button>
 	</body>
   </body>
