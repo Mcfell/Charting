@@ -28,7 +28,7 @@
 	<property name="dataSource" ref="mysqlDataSource" />
 </bean>
 <!-- 配置事务的传播特性 -->
-<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" abstract="true">
+<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" >
 	<property name="transactionManager" ref="transactionManager" />
 	<property name="transactionAttributes">
 		<props>
@@ -71,7 +71,10 @@
 		<property name="markerInterface" value="com.chart.Mapper.SqlMapper"/>
 	</bean>
 	
-	
+	<aop:config>
+		<aop:pointcut expression="excution(* com.chart.service.impl.*.*(..))" id="allServiceMethod"/>
+		<aop:advisor advice-ref="baseTransactionProxy" pointcut-ref="allServiceMethod"/>
+	</aop:config>
 	<context:component-scan base-package = "com.chart.Mappper" ></context:component-scan>
 	<context:component-scan base-package = "com.chart.service.impl" ></context:component-scan>
 </beans>

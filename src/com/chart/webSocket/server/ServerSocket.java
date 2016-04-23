@@ -112,7 +112,7 @@ public class ServerSocket {
 	    public void onClose (Session session) { 
 	    	if(IsBattleAlive()){//error
 	    		try {
-					SendMsgToOpponents(this.batsession.getBatNum()+" closed:Because of "+session.getId()+" leave");
+					SendMsgToOpponents("battle closed:Because of "+session.getId()+" leave");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
